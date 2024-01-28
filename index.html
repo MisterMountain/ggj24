@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Aspiring Standup Comedian</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        header {
+            background-color: #333;
+            padding: 10px;
+            text-align: center;
+            color: white;
+        }
+
+        section {
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center; /* Add this line */
+        }
+
+        .column {
+            padding: 20px;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .centered-button {
+            text-align: center;
+        }
+
+        .list-group-item {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<header class="bg-dark">
+    <h1>The Aspiring Standup Comedian</h1>
+    <h2>made with Love</h2>
+</header>
+
+
+<section id="start" class="d-flex justify-content-center align-items-center">
+    <div class="column col-md-4">
+        <!-- Content in the first column if needed -->
+    </div>
+
+    <div class="center-column col-md-4">   
+<p>Du bist eine aufstrebender Standup Comedian und dein größter Traum ist es dein Publikum zum Lachen zu bringen, um dies tun zu können, musst du dein Witze-Repertoire erweitern. Dein Repertoire erweiterst du indem du Minispiele erfolgreich absolvierst. Bei schlechten Witzen erwartet dich eine saftige Überraschung.</p>	
+        <a href="Game/GameStart.html" class="centered-button">
+            <button class="btn btn-primary" onclick="handleButtonClick()">Start the Game</button>
+        </a>
+    </div>
+
+    <div class="column col-md-4">
+        <!-- Content in the third column if needed -->
+    </div>
+</section>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<script>
+    function handleButtonClick() {
+                const jsonData = {
+      "people": [
+        {
+          "joke": "Wieso? Ist hier eine Einbahnstrasse?",
+		  "answer": true,
+		  "question_number": 1
+        },
+        {
+          "joke": "Natuerlich, der Ofen raucht ja auch!",		  
+		  "answer": false,
+		  "question_number": 666
+        }
+      ]
+    };
+    
+    // Convert JSON to a string
+    const jsonString2 = JSON.stringify(jsonData);
+    
+    // Set the cookie
+    document.cookie = `jsondata=${encodeURIComponent(jsonString2)}; expires=${new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toUTCString()}; path=/`;
+	
+	const jsonGameState = {
+      "game_state": [
+        {
+          "question_number": 1
+		}
+      ]
+    };
+    
+	// Convert JSON to a string
+    const jsonString3 = JSON.stringify(jsonGameState);
+    
+    // Set the cookie
+    document.cookie = `jsonGameState=${encodeURIComponent(jsonString3)}; expires=${new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toUTCString()}; path=/`;
+	
+    console.log('JSON data saved in cookie.');
+            }
+</script>
+</body>
+</html>

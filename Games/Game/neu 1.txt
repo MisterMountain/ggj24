@@ -1,0 +1,44 @@
+ const jsonData = {
+      "people": [
+        {
+          "joke": "Eine Gurke",
+		  "answer": false,
+		  "question_number": 666
+        },
+        {
+          "joke": "Weil er schon gestopft ist!",		  
+		  "answer": true,
+		  "question_number": 1
+        },
+		{
+          "joke": "Ein Klopfsalat.",		  
+		  "answer": true,
+		  "question_number": 2
+        },
+		{
+          "joke": "Schicker Gürtel!",		  
+		  "answer": true,
+		  "question_number": 3
+        },
+		{
+          "joke": "Der Zug kann nicht pfeifen.",		  
+		  "answer": false,
+		  "question_number": 666
+        },
+		{
+          "joke": "Einen Doktor Dolittle.",		  
+		  "answer": false,
+		  "question_number": 666
+        },
+		{
+          "joke": "Weil er immer besenrein ist!",		  
+		  "answer": false,
+		  "question_number": 666
+        },
+		{
+          "joke": "Weil man durch sie hindurchsehen kann.",		  
+		  "answer": true,
+		  "question_number": 4
+        },
+      ]
+    };

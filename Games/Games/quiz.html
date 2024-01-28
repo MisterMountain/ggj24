@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        #Quizboard{
+            text-align: center;
+            margin-left: 20px;
+        }
+        #navbar-container{
+            width: 100%;
+        }
+
+        #quizfeld{
+            background-color: aliceblue;
+        }
+
+        #Frage{
+            font-size: 25px;
+            font-weight: bold;
+            margin-left: 1em;
+            margin-right: 1em;
+        }
+
+        #Antwort{
+            height: 50px;
+            width: 50%;
+            margin-top: 25px;
+            margin-left: 1em;
+        }
+        .buttons{
+            margin-top: 25px;
+            margin-bottom: 1em;
+            height: 40px;
+            width: 25%;
+        }
+        #Submit{
+            margin-left: 1em;
+        }
+        
+        #Fehlversuche{
+            float: right;
+            margin-top: 24px;
+            margin-right: 1em;
+            font-size: 25px;
+            font-weight: bold;
+            color: red;
+        }
+
+        #Resultierend{
+            text-align: center;
+            margin-top: 25px;
+        }
+
+        #Result{
+            font-size: 20px;
+            font-weight:bold;
+        }
+    </style>
+</head>
+<div id="navbar-container"></div>
+<script>
+    // Load navbar content dynamically
+    var navbarContainer = document.getElementById('navbar-container');
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', '../navbar.html', true);
+    xhr.onreadystatechange = function () {
+        console.log('Ready State:', xhr.readyState);
+        console.log('Status:', xhr.status);
+        if (xhr.readyState != 4) {
+            navbarContainer.innerHTML = xhr.responseText;
+        }
+    };
+    xhr.send();
+</script>
+<body>
+    <!-- Bootstrap Navbar -->
+
+    <div class="container">
+        <h1 id="game-title" class="mt-4 text-center">Quiz</h1>
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div id="quizfeld">
+                    <label id="Frage"></label>
+                    <div class="mb-3">
+                        <input id="Antwort" class="form-control" placeholder="Antwort eingeben">
+                    </div>
+                    <button id="Submit" class="btn btn-primary buttons">Submit</button>
+                    <button id="Skip" class="btn btn-secondary buttons">Skip</button>
+                    <p id="Fehlversuche">Versuche: 3</p>
+                </div>
+            </div>
+        </div>
+        <div id="Resultierend">
+            <p id="Result"></p>
+        </div>
+    </div>
+    <audio id="soundSucess" src="../Sounds/Sucess.mp3" preload="auto"></audio>
+    <audio id="soundFailure" src="../Sounds/Failure.mp3" preload="auto"></audio>
+    <audio id="soundSkip" src="../Sounds/Skip.wav" preload="auto"></audio>
+    <script>
+    window.onload = function() {
+	
+    function getCookie(name) {
+        const cookies = document.cookie.split(';');
+        for (const cookie of cookies) {
+            const [cookieName, cookieValue] = cookie.trim().split('=');
+            if (cookieName === name) {
+                return decodeURIComponent(cookieValue);
+            }
+        }
+        return null;
+    }
+
+
+    function isJokeAlreadyExists(newJoke, jsonData) {
+        const existingJokes = jsonData.people.map(person => person.joke.toLowerCase());
+
+        return existingJokes.includes(newJoke.joke.toLowerCase());
+    }
+        
+    const jsonCookie = getCookie('jsondata');
+
+        if (jsonCookie) {
+        const jsonData = JSON.parse(jsonCookie);
+            const newJoke = {
+                "joke": "3, weil Skorpione Sand moegen",		  
+                "answer": false,
+                "question_number": 666
+            };
+            
+            const newJoke2 = {
+                "joke": "Gar keins, Kamele fressen Palmen",		  
+                "answer": true,
+                "question_number": 6
+            };
+            
+            if (isJokeAlreadyExists(newJoke, jsonData) && isJokeAlreadyExists(newJoke2, jsonData)) {					
+                const gameTitleElement = document.getElementById('game-title');
+                gameTitleElement.innerHTML += ' ⭐';
+            }
+        }
+        
+};
+
+        //Listen definieren       
+        var valueList = ["Welches Element hat die chemische Bezeichnung 'O'?",
+                        "Welches Jahr wurde die Unabhängigkeit der USA erklärt?",
+                        "Was ist die Hauptstadt von Australien?",
+                        "Welches Gas macht den Großteil der Erdatmosphäre aus?",
+                        "In welcher Galaxie befindet sich die Erde?",
+                        "Was ist die Hauptstadt von Japan?",
+                        "Wie viele Kontinente gibt es auf der Erde?",
+                        "Wie viele Planeten gibt es in unserem Sonnensystem?",
+                        "Welches Element hat die chemische Bezeichnung 'Fe'?",
+                        "Welcher Planet wird auch als 'Abendstern' oder 'Morgenstern' bezeichnet?"
+                    ];
+        
+        var antwortenList = ["Sauerstoff",
+                            "1776",
+                            "Canberra",
+                            "Stickstoff",
+                            "Milchstraße",
+                            "Tokio",
+                            "7",
+                            "8",
+                            "Eisen",
+                            "Venus"];
+        
+                            
+        var fehlversuche = 3;
+        var richtigeFragen = 0;
+        //random zahl erstellen
+        var randomIndex = Math.floor(Math.random() * valueList.length);
+        
+        //mit der random zahl das listenelement holen
+        var randomValue = valueList[randomIndex];
+        var randomAnswer = antwortenList[randomIndex];
+        
+        
+        //Werte setzen
+        document.getElementById("Frage").textContent = randomValue;
+        
+        //event listener erstellen für buttons
+        document.getElementById("Submit").addEventListener('click', checkAnswer);
+        document.getElementById("Skip").addEventListener('click', nextQuestion);
+        
+        //überprüfen bei submitbutton
+        function checkAnswer(){
+            /*if(document.getElementById("Antwort").value == "Denny"){
+                document.getElementById("Result").textContent = "Du bist ein Cheater. Raus mit dir!";
+                fehlversuche=100;
+                document.getElementById("Fehlversuche").textContent = "Versuche: " + fehlversuche;
+                return;
+            }*/
+            if(fehlversuche <= 0){
+                document.getElementById("Result").textContent = "Du hast keine Versuche mehr!";
+                return;
+            }
+            if(document.getElementById("Antwort").value.toLowerCase() == randomAnswer.toLowerCase() || document.getElementById("Antwort").value.toLowerCase() == "denny"){
+                var soundSucess = document.getElementById('soundSucess');
+                soundSucess.play();
+                document.getElementById("Result").textContent = "'"+document.getElementById("Antwort").value +"' ist richtig! Du kannst nun eine weitere Frage beantworten.";
+                richtigeFragen++;
+                if(richtigeFragen == 3 || richtigeFragen == 6){
+                    setQuestion();
+                }
+                //hier müsste man einen Punkt kriegen (stern) weil frage richtig beantwortet
+                loadNextQuestion();  //neue frage wird geladen, ggf. überprüfen wieviel schon richtig war, dass man nur 2 richtig haben kann.
+            } 
+        else{
+            fehlversuche--;
+            var soundFailure = document.getElementById('soundFailure');
+                soundFailure.play();
+            if(fehlversuche <= 0){
+                document.getElementById("Result").textContent = "Du hast verloren. Spiel wird beendet.  Richtig wäre "+randomAnswer + " gewesen!";
+                document.getElementById("Fehlversuche").textContent = "Versuche: " + fehlversuche;
+                setTimeout(function(){window.location.href = "../Game/GameStart.html";}, 3000);
+            
+                // hier zurück auf main screen, weil verloren (aber erst nach 3 sek, dass man sieht man hat verloren.)
+            } else{
+            document.getElementById("Fehlversuche").textContent = "Versuche: " + fehlversuche;
+            document.getElementById("Result").textContent = "'"+document.getElementById("Antwort").value + "' ist falsch! Du hast noch "+fehlversuche + " Versuche!";
+            document.getElementById("Antwort").value = ""; // Clear input field
+            }
+        }
+        }
+        
+        //frage skippen
+        function nextQuestion(){
+            if(fehlversuche<= 1){
+                document.getElementById("Result").textContent = "Du kannst nicht mehr skippen!";
+            }
+            else{
+            var tmp = randomIndex;
+            document.getElementById("Antwort").value = ""; // Clear input field
+            var soundSkip = document.getElementById('soundSkip');
+                soundSkip.play();
+            while(true){
+                randomIndex = Math.floor(Math.random() * valueList.length);
+                if(randomIndex != tmp){
+                    randomValue = valueList[randomIndex];
+                    randomAnswer = antwortenList[randomIndex];
+                    fehlversuche--;
+                    document.getElementById("Frage").textContent = randomValue;
+                    document.getElementById("Fehlversuche").textContent = "Versuche: "+fehlversuche;
+                    document.getElementById("Result").textContent = "Frage übersprungen.";
+                    break;
+                        }
+                    }
+                }
+        }
+        function loadNextQuestion() {
+        // Wähle eine neue zufällige Frage und Antwort
+                var tmp = randomIndex;
+                document.getElementById("Antwort").value = ""; // Clear input field
+                while (true) {
+                randomIndex = Math.floor(Math.random() * valueList.length);
+            if (randomIndex != tmp) {
+                    randomValue = valueList[randomIndex];
+                    randomAnswer = antwortenList[randomIndex];
+                document.getElementById("Frage").textContent = randomValue;
+                break;
+            }
+        }
+    }
+    var aufrufe = 0;
+    function setQuestion(){
+        function getCookie(name) {
+				const cookies = document.cookie.split(';');
+				for (const cookie of cookies) {
+					const [cookieName, cookieValue] = cookie.trim().split('=');
+					if (cookieName === name) {
+						return decodeURIComponent(cookieValue);
+					}
+				}
+				return null;
+			}
+			
+			function setCookie(name, value, days) {
+				var expires = "";
+				if (days) {
+					var date = new Date();
+					date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+					expires = "; expires=" + date.toUTCString();
+				}
+				document.cookie = name + "=" + value + expires + "; path=/";
+			}
+
+			
+			function isJokeAlreadyExists(newJoke, jsonData) {
+				const existingJokes = jsonData.people.map(person => person.joke.toLowerCase());
+
+				return existingJokes.includes(newJoke.joke.toLowerCase());
+			}
+
+
+			// Retrieve the JSON data from the cookie
+			const jsonCookie = getCookie('jsondata');
+
+			if (jsonCookie) {
+			const jsonData = JSON.parse(jsonCookie);
+				const newJoke = {
+                "joke": "Er behauptet er haette Gras geraucht, aber wir alle wissen das Weichei hat geheult",		  
+                "answer": false,
+                "question_number": 666
+            };
+            
+            const newJoke2 = {
+                "joke": "Dammit er sich besser im Kirschbaum verstecken kann",		  
+                "answer": true,
+                "question_number": 6
+            };
+				
+			if (isJokeAlreadyExists(newJoke, jsonData)) {
+				if (isJokeAlreadyExists(newJoke2, jsonData)) {	
+                    if(aufrufe <= 0){				
+					const gameTitleElement = document.getElementById('game-title');
+					gameTitleElement.innerHTML += ' ⭐';
+                    aufrufe++;
+                    }
+				}
+				else {
+					jsonData.people.push(newJoke2);
+				}
+			} else {
+			// Hinzufügen des neuen Witzes, wenn er nicht vorhanden ist
+			jsonData.people.push(newJoke);
+			} 
+			
+			setCookie("jsondata", JSON.stringify(jsonData), 7); 
+			}
+        }
+</script>
+<!-- Load jQuery first -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+
+<!-- Load Popper.js next -->
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
+
+<!-- Load Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

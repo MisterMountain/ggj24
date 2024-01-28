@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+        }
+
+        #board {
+            display: grid;
+            grid-template-columns: repeat(4, 100px);
+            grid-gap: 5px;
+        }
+
+        .card {
+            width: 100px;
+            height: 100px;
+            border: 1px solid #ccc;
+            font-size: 1.5em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f0f0f0;
+            color: #f0f0f0; /* Make the text color the same as background to hide symbols */
+            transition: background-color 0.3s, color 0.3s; /* Add color transition */
+        }
+
+        .flipped {
+            color: #000; /* Change the text color to show the symbol */
+            background-color: #fff; /* Show the flipped state */
+        }
+
+        .matched {
+            background-color: #8aff8a; /* Show the matched state */
+            pointer-events: none; /* Disable clicking on matched cards */
+        }
+
+        #result {
+            margin-top: 20px;
+            font-size: 1.5em;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Memory Game</h1>
+
+<div id="board"></div>
+
+<div id="result"></div>
+
+<script>
+    const symbols = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+    const allCards = [...symbols, ...symbols]; // Duplicate symbols to create pairs
+    let shuffledCards = [];
+    let flippedCards = [];
+    let matchedPairs = 0;
+    let gameOver = false;
+
+    // Shuffle the cards
+    shuffledCards = shuffleArray(allCards);
+
+    // Create the Memory Game board
+    const board = document.getElementById('board');
+    for (let i = 0; i < shuffledCards.length; i++) {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.dataset.symbol = shuffledCards[i]; // Store the symbol as a data attribute
+        card.addEventListener('click', handleCardClick);
+        board.appendChild(card);
+    }
+
+    function handleCardClick() {
+        if (gameOver || this.classList.contains('flipped') || flippedCards.length >= 2) {
+            return;
+        }
+
+        this.classList.add('flipped');
+        this.textContent = this.dataset.symbol; // Show the symbol
+        flippedCards.push(this);
+
+        if (flippedCards.length === 2) {
+            setTimeout(checkMatch, 500);
+        }
+    }
+
+    function checkMatch() {
+        const [card1, card2] = flippedCards;
+
+        if (card1.dataset.symbol === card2.dataset.symbol) {
+            card1.classList.add('matched');
+            card2.classList.add('matched');
+            matchedPairs++;
+
+            if (matchedPairs === symbols.length) {
+                document.getElementById('result').textContent = 'Herzlichen Glückwunsch! Du hast gewonnen!';
+                gameOver = true;
+            }
+        } else {
+            card1.classList.remove('flipped');
+            card2.classList.remove('flipped');
+            card1.textContent = ''; // Hide the symbol again
+            card2.textContent = ''; // Hide the symbol again
+        }
+
+        flippedCards = [];
+    }
+
+    function shuffleArray(array) {
+        const shuffledArray = [...array];
+        for (let i = shuffledArray.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffledArray[i], shuffledArray[j]] = [shuffledArray[j], shuffledArray[i]];
+        }
+        return shuffledArray;
+    }
+</script>
+
+</body>
+</html>

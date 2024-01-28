@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic-Tac-Toe</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #navbar-container {
+            width: 100%;
+        }
+
+        #board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-gap: 5px;
+            margin: 0 auto; /* Center the grid horizontally */
+        }
+
+        .cell {
+            height: 100px;
+            width: 100px;
+            font-size: 6em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #ccc;
+        }
+
+        .cell:hover {
+            background-color: #f0f0f0;
+        }
+
+        #result {
+            margin-top: 20px;
+            font-size: 1.5em;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Load the navbar dynamically -->
+<div id="navbar-container"></div>
+<script>
+    // Load navbar content dynamically
+    var navbarContainer = document.getElementById('navbar-container');
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', '../navbar.html', true);
+    xhr.onreadystatechange = function () {
+        console.log('Ready State:', xhr.readyState);
+        console.log('Status:', xhr.status);
+        if (xhr.readyState != 4) {
+            navbarContainer.innerHTML = xhr.responseText;
+        }
+    };
+    xhr.send();
+</script>
+
+<div class="container mt-5">
+    <h1 class="mb-4" id="game-title">Tic-Tac-Toe</h1>
+
+    <div id="board" class="mb-4"></div>
+
+    <div id="result" class="mb-4"></div>
+
+    <button class="btn btn-primary" onclick="resetGame()">Restart Game</button>
+</div>
+
+<!-- Load jQuery first -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+
+<!-- Load Popper.js next -->
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
+
+<!-- Load Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<audio id="soundSucess" src="../Sounds/Sucess.mp3" preload="auto"></audio>
+<audio id="soundFailure" src="../Sounds/Failure.mp3" preload="auto"></audio>
+<audio id="soundTie" src="../Sounds/Tie.mp3" preload="auto"></audio>
+
+<script>
+var star = false;
+window.onload = function() {
+	
+		function getCookie(name) {
+			const cookies = document.cookie.split(';');
+			for (const cookie of cookies) {
+				const [cookieName, cookieValue] = cookie.trim().split('=');
+				if (cookieName === name) {
+					return decodeURIComponent(cookieValue);
+				}
+			}
+			return null;
+		}
+	
+	
+		function isJokeAlreadyExists(newJoke, jsonData) {
+			const existingJokes = jsonData.people.map(person => person.joke.toLowerCase());
+
+			return existingJokes.includes(newJoke.joke.toLowerCase());
+		}
+			
+		const jsonCookie = getCookie('jsondata');
+
+			if (jsonCookie) {
+			const jsonData = JSON.parse(jsonCookie);
+				const newJoke = {
+					"joke": "Nein, ich hab ja meinen Joghurt dabei.",		  
+					"answer": true,
+					"question_number": 2
+				};
+				
+				const newJoke2 = {
+					"joke": "Ja, ich hab ja nur meine Marmelade dabei.",		  
+					"answer": false,
+					"question_number": 666
+				};
+				
+				if (isJokeAlreadyExists(newJoke, jsonData) && isJokeAlreadyExists(newJoke2, jsonData)) {					
+					const gameTitleElement = document.getElementById('game-title');
+					gameTitleElement.innerHTML += ' ⭐';
+					star = true;
+				}
+			}
+			
+	};
+    // Tic-Tac-Toe JavaScript code here
+    const board = document.getElementById('board');
+    const result = document.getElementById('result');
+    let currentPlayer = 'X';
+    let gameOver = false;
+    let boardState = [
+        ['', '', ''],
+        ['', '', ''],
+        ['', '', '']
+    ];
+
+    // Create the Tic-Tac-Toe board
+    for (let i = 0; i < 3; i++) {
+        for (let j = 0; j < 3; j++) {
+            const cell = document.createElement('div');
+            cell.className = 'cell col border';
+            cell.dataset.row = i;
+            cell.dataset.col = j;
+            cell.addEventListener('click', handleCellClick);
+            board.appendChild(cell);
+        }
+    }
+
+    function makeRandomMove() {
+        if (gameOver) return;
+
+        let emptyCells = [];
+        for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+                if (boardState[i][j] === '') {
+                    emptyCells.push({ row: i, col: j });
+                }
+            }
+        }
+
+        if (emptyCells.length > 0) {
+            const randomIndex = Math.floor(Math.random() * emptyCells.length);
+            const randomCell = emptyCells[randomIndex];
+
+            // Update the cell with the computer's symbol (O)
+            const cell = document.querySelector(`.cell[data-row="${randomCell.row}"][data-col="${randomCell.col}"]`);
+            cell.textContent = 'O';
+            boardState[randomCell.row][randomCell.col] = 'O';
+
+            // Log the current game state
+            logGameState();
+
+            // Check for a win
+            if (checkWin(randomCell.row, randomCell.col)) {
+                var soundFailure = document.getElementById("soundFailure");
+                soundFailure.play();
+                result.textContent = 'Computer wins!';
+                gameOver = true;
+                
+            } else if (checkDraw()) {
+                result.textContent = 'It\'s a draw!';
+                gameOver = true;
+            } else {
+                // Switch back to the player's turn
+                currentPlayer = 'X';
+            }
+        }
+    }
+
+
+    function logGameState() {
+        console.log('Current Game State:');
+        console.log(boardState.map(row => row.join(' ')).join('\n'));
+    }
+
+
+    function handleCellClick() {
+        if (gameOver) return;
+
+        const row = this.dataset.row;
+        const col = this.dataset.col;
+
+        // Check if the cell is already filled
+        if (boardState[row][col] !== '') return;
+
+        // Update the cell with the current player's symbol
+        this.textContent = currentPlayer;
+        boardState[row][col] = currentPlayer;
+
+        // Log the current game state
+        logGameState();
+
+        // Check for a win
+
+        
+        if (checkWin(row, col)) {
+			if(currentPlayer == 'X'){
+
+                var soundSucess = document.getElementById("soundSucess");
+                soundSucess.play();
+                help = 1;
+				handleJokes();
+			} 
+            result.textContent = `Player ${currentPlayer} wins!`;
+            gameOver = true;
+        } else if (checkDraw()) {
+            var soundTie = document.getElementById("soundTie");
+            soundTie.play();
+            result.textContent = 'It\'s a draw!';
+            gameOver = true;
+        } else {
+            // Switch to the computer's turn
+            currentPlayer = 'O';
+            // Make the computer's move after a short delay (you can adjust the delay as needed)
+            setTimeout(makeRandomMove, 100);
+        }
+    }
+
+    function checkWin(row, col) {
+        // Check row
+        if (checkLine(boardState[row], 'row')) return true;
+        // Check column
+        if (checkLine([boardState[0][col], boardState[1][col], boardState[2][col]], 'column')) return true;
+        // Check diagonal
+        if (row === col && checkLine([boardState[0][0], boardState[1][1], boardState[2][2]], 'diagonal')) return true;
+        // Check reverse diagonal
+        if (checkLine([boardState[0][2], boardState[1][1], boardState[2][0]], 'reverse diagonal')) return true;
+        return false;
+    }
+
+    function checkLine(line, direction) {
+        const win = line.every(cell => cell === currentPlayer);
+
+        if (win) {
+            console.log(`Player ${currentPlayer} wins! (${direction})`);
+            console.log('Winning Line:', line);
+        }
+
+        return win;
+    }
+
+    function checkDraw() {
+        return boardState.every(row => row.every(cell => cell !== ''));
+    }
+
+    function resetGame() {
+        // Clear the board
+        Array.from(document.getElementsByClassName('cell')).forEach(cell => {
+            cell.textContent = '';
+        });
+
+        // Reset game variables
+        currentPlayer = 'X';
+        gameOver = false;
+        boardState = [
+            ['', '', ''],
+            ['', '', ''],
+            ['', '', '']
+        ];
+
+        // Clear result message
+        result.textContent = '';
+    }
+    var aufrufe = 0;
+		function handleJokes(){
+		function getCookie(name) {
+				const cookies = document.cookie.split(';');
+				for (const cookie of cookies) {
+					const [cookieName, cookieValue] = cookie.trim().split('=');
+					if (cookieName === name) {
+						return decodeURIComponent(cookieValue);
+					}
+				}
+				return null;
+			}
+			
+			function setCookie(name, value, days) {
+				var expires = "";
+				if (days) {
+					var date = new Date();
+					date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+					expires = "; expires=" + date.toUTCString();
+				}
+				document.cookie = name + "=" + value + expires + "; path=/";
+			}
+
+			
+			function isJokeAlreadyExists(newJoke, jsonData) {
+				const existingJokes = jsonData.people.map(person => person.joke.toLowerCase());
+
+				return existingJokes.includes(newJoke.joke.toLowerCase());
+			}
+
+
+			// Retrieve the JSON data from the cookie
+			const jsonCookie = getCookie('jsondata');
+
+			if (jsonCookie) {
+			const jsonData = JSON.parse(jsonCookie);
+				const newJoke = {
+					"joke": "Nein, ich hab ja meinen Joghurt dabei.",		  
+					"answer": true,
+					"question_number": 2
+				};
+				
+				const newJoke2 = {
+					"joke": "Ja, ich hab ja nur meine Marmelade dabei.",		  
+					"answer": false,
+					"question_number": 666
+				};
+			
+			if (isJokeAlreadyExists(newJoke, jsonData)) {
+				if (isJokeAlreadyExists(newJoke2, jsonData)) {			
+                    if(aufrufe <= 0){		
+					const gameTitleElement = document.getElementById('game-title');
+					if(!star){
+						gameTitleElement.innerHTML += ' ⭐';
+						aufrufe++;
+					}
+        
+                    }
+				}
+				else {
+					jsonData.people.push(newJoke2);
+				}
+			} else {
+			// Hinzufügen des neuen Witzes, wenn er nicht vorhanden ist
+			jsonData.people.push(newJoke);
+			} 
+			
+			setCookie("jsondata", JSON.stringify(jsonData), 7); 
+			}
+	};
+</script>
+
+</body>
+</html>

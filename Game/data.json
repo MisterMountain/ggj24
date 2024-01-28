@@ -1,0 +1,14 @@
+{
+  "people": [
+    {
+      "name": "Christine",
+      "age": 15,
+      "city": "Heilsbronn"
+    },
+    {
+      "name": "Denny Fehler",
+      "age": 12,
+      "city": "Ansbach"
+    }
+  ]
+}

@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Aspiring Standup Comedian</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            background-color: #333;
+            padding: 10px;
+            text-align: center;
+            color: white;
+        }
+
+        nav {
+            display: flex;
+            justify-content: center;
+            background-color: #444;
+            padding: 10px;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            padding: 10px;
+            margin: 0 10px;
+        }
+
+        section {
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .column {
+            flex: 1;
+            box-sizing: border-box;
+            background-color: #f2f2f2;
+            padding: 20px;
+            margin: 0 10px;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .centered-button {
+            text-align: center;
+        }
+
+        .list-group-item {
+            cursor: pointer;
+        }
+
+        @keyframes bewegung {
+            0% { transform: translate(-6em, -12em);  opacity:1; }
+            100% { transform: translate(0em, -26em); opacity:1 ;}
+        }
+        
+
+        #tomatendiv{
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        #tomate{
+            opacity: 0;
+        }
+        .progress{
+            margin-top: 1em;
+        }
+
+        #sprechblase{
+            position: absolute;
+            top: 13em;
+            left: 50em;
+        }
+        #sprechtext{
+            position: absolute;
+            top: 16em;
+            left: 54em;
+            width: 200px;
+            height: 500px;
+            
+        }
+
+        
+
+    </style>
+</head>
+<body>
+<section id="start">
+    <div class="column">
+        <!-- Linke Spalte (20%) -->
+        <h2>Deine möglichen Pointen:</h2>
+        <div class="list-group" id="jokesList">
+            <!-- Hier werden die Namen aus dem JSON eingefügt -->
+        </div>
+    </div>
+
+    <div class="center-column">
+        <!-- Mittlere Spalte (60%) -->
+		<h2>Deine Witzfrage: </h2>
+		<p class="text-break" id="question"></p>
+        <img src="./Buehne_Neutral.png" alt="Buehnenbild" id="buehnenbild">
+		<div class="progress" role="progressbar" aria-label="Basic example" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" id="progress-bar">
+  <div class="progress-bar" style="width: 0%"></div>
+</div>
+    </div>
+
+    <div class="column">
+        <!-- Rechte Spalte (20%) -->
+        <h2>Reaktionen:</h2>
+		<p class="text-break"></p>
+    </div>
+</section>
+
+<div id="tomatendiv">
+    <img src="tomate.png" alt="tomate", id="tomate">
+</div>
+
+<div id="sprechdiv">
+    <img id="sprechblase" src="sprechblase.png">
+    <label id="sprechtext"></label>
+</div>
+
+<audio id="soundTomato" src="../Sounds/tomatensound.wav" preload="auto"></audio>
+<audio id="soundBoo" src="../Sounds/Boo.mp3" preload="auto"></audio>
+<audio id="soundLaughing" src="../Sounds/Laughing.wav" preload="auto"></audio>
+
+<script>
+    
+
+    async function insertNavbar() {
+        try {
+            const response = await fetch('../navbar.html');
+            const navbarHtml = await response.text();
+
+            // Insert the navbar HTML into the document
+            document.body.insertAdjacentHTML('afterbegin', navbarHtml);
+        } catch (error) {
+            console.error('Error fetching navbar:', error);
+        }
+    }
+
+                
+    window.onload = function () {
+        insertNavbar();
+	
+	
+	
+	// Assuming you have a JSON file named data.json
+const url = 'data.json';
+
+// Using fetch
+// Function to retrieve the value of a specific cookie by name
+function getCookie(name) {
+  const cookies = document.cookie.split(';');
+  for (const cookie of cookies) {
+    const [cookieName, cookieValue] = cookie.trim().split('=');
+    if (cookieName === name) {
+      return decodeURIComponent(cookieValue);
+    }
+  }
+  return null;
+}
+
+// Retrieve the JSON data from the cookie
+const jsonCookie = getCookie('jsondata');
+const jsonGameStateCookie = getCookie('jsonGameState');
+
+if (jsonCookie) {
+  // Parse the JSON data
+  const jsonData = JSON.parse(jsonCookie);
+  const jsonGameState = JSON.parse(jsonGameStateCookie);
+  
+   // Handle the JSON data
+    const persons = jsonData.people;
+	 // Namen in die Liste einfügen
+        const jokesList = document.getElementById('jokesList');
+        persons.forEach(person => {
+		
+            const listItem = document.createElement('a');
+            listItem.href = '#';
+            listItem.classList.add('list-group-item', 'list-group-item-action');
+            listItem.innerText = person.joke;
+			listItem.setAttribute('onclick', 'handleItemClick("' + person.answer + '", "' + person.question_number + '")');
+            jokesList.appendChild(listItem);
+        });
+		
+		const gameState = jsonGameState.game_state;
+		var current_gameState = 0;
+		gameState.forEach(gameSta => {
+		
+           current_gameState = gameSta.question_number;
+        });
+		console.log("Game State = " + current_gameState);
+		var newString = '';
+ 		const question = document.getElementById('question');
+		
+		switch(current_gameState){
+		case 1:
+		newString = "In einer Dachrinne Sitzen zwei Kuehe und stricken einen Ofen. Kommt ein Schluck Kaffee corbei und fragt: Sagt mal, duerft ihr ueberhaupt schon rauchen?";
+		break;
+		case 2:
+		newString = "Treffen sich zwei Hochhaeuser im Keller. Fragt das eine: Hast du Angst?";
+		break;
+		case 3:
+		newString = "Wir waren Drillinge zu Hause. Alle hiessen Peter Auser Willi, der hiess...?";
+		break;
+		case 4:
+		newString = "Was ist weiss und rennt durch den Wald?";
+		break;
+		case 5:
+		newString = "Fliegt ein U-Boot ueber die Wueste und verliert ein Rad. Wie viel Joghurts sind im Kuehlschrank?";
+		break;
+		case 6:
+		newString = "Warum hat ein Elefant so rote Augen?";
+		break;
+		case 7:
+		newString = "Kennst du den Witz mit der Treppe?";
+		break;
+		case 8:
+		newString = "Unterhalten sich zwei Haie, sagt der eine: Morgen ist Ostern! Was sagt der andere?";
+		break;
+		default:
+		newString = "Glückwunsch! Du hast das Spiel gewonnen :D";
+		break;
+		}
+		
+		question.innerText = newString;
+        document.getElementById("sprechtext").textContent = "*Witz*";
+        setTimeout(function() {document.getElementById("sprechdiv").style.opacity=0;}, 2000)
+		const progress = document.getElementById('progress-bar');
+		progress.setAttribute('aria-valuenow', (current_gameState-1) * 12,5);
+		progress.querySelector('.progress-bar').style.width = (current_gameState-1) * 12,5 + '%';		
+		
+
+} else {
+  console.log('No JSON data found in the cookie.');
+}
+
+   
+   
+    };
+	
+	window.handleItemClick = function(answer, question_number) {
+			const jsonGameStateCookie = getCookie('jsonGameState');
+			const jsonGameState = JSON.parse(jsonGameStateCookie);
+			const gameState = jsonGameState.game_state;
+			var current_gameState = 0;
+			gameState.forEach(gameSta => {
+		
+           current_gameState = gameSta.question_number;
+        });
+			console.log("Übergabe: " + answer + " Number: " + question_number);
+            const reactionElement = document.querySelector('.column p.text-break');
+			var stringReaction = '';
+			var right_question = false;
+			var questionNumber = 0;
+			
+			const question = document.getElementById('question').innerText;
+			console.log("Question: " + question);
+			switch(question){
+			case "In einer Dachrinne Sitzen zwei Kuehe und stricken einen Ofen. Kommt ein Schluck Kaffee corbei und fragt: Sagt mal, duerft ihr ueberhaupt schon rauchen?":
+			questionNumber = 1;
+			break;
+			case "Treffen sich zwei Hochhaeuser im Keller. Fragt das eine: Hast du Angst?":
+			questionNumber = 2;
+			break;
+			case "Wir waren Drillinge zu Hause. Alle hiessen Peter Auser Willi, der hiess...?":
+			questionNumber = 3;
+			break;
+			case "Was ist weiss und rennt durch den Wald?":
+			questionNumber = 4;
+			break;
+			case "Fliegt ein U-Boot ueber die Wueste und verliert ein Rad. Wie viel Joghurts sind im Kuehlschrank?":
+			questionNumber = 5;
+			break;
+			case "Warum hat ein Elefant so rote Augen?":
+			questionNumber = 6;
+			break;
+			case "Kennst du den Witz mit der Treppe?":
+			questionNumber = 7;
+			break;
+			case "Unterhalten sich zwei Haie, sagt der eine: Morgen ist Ostern! Was sagt der andere?":
+			questionNumber = 8;
+			break;
+			}			
+			
+			console.log("Question Number: " + questionNumber);
+			
+			if(answer == "true"){
+				if(questionNumber == question_number){
+					right_question = true;
+				}
+				else {
+					right_question = false;
+				}
+			
+			}
+			else{
+				stringReaction = "Ups, das war wohl nicht die richtige Antwort! Nächstes Mal bitte mit dem Cheatcode 'AllgemeinwissenBoost' versuchen.";
+                tomateWerfen();
+                setTimeout(neutralisieren, 5000);
+			}
+			
+			if(right_question == true){
+			
+				stringReaction = "Herzlichen Glückwunsch! Du bist offiziell klüger als mein Toaster – und der behauptet immer, er hätte einen Doktortitel in Elektronik!";
+                publikumJubelt();
+                setTimeout(neutralisieren, 5000);
+				setTimeout(function(param1) {
+					changeGameState(param1);
+				}, 5000, current_gameState);
+			}else{
+				stringReaction = "Ups, das war wohl nicht die richtige Antwort! Nächstes Mal bitte mit dem Cheatcode 'AllgemeinwissenBoost' versuchen.";
+                tomateWerfen();
+                setTimeout(neutralisieren, 5000);
+			}
+			
+			
+			
+			
+			
+            reactionElement.innerText = stringReaction;
+
+            
+        };
+		
+		function changeGameState(currentNumber){
+		currentNumber++;
+		
+			const newGamestate = {
+					"game_state": [
+        {
+          "question_number": currentNumber
+		}
+      ]
+				};
+				
+				 // Convert JSON to a string
+    const jsonString3 = JSON.stringify(newGamestate);
+    
+    // Set the cookie
+    document.cookie = `jsonGameState=${encodeURIComponent(jsonString3)}; expires=${new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toUTCString()}; path=/`;
+	location.reload();
+		}
+
+        function tomateWerfen(){
+            var tomate = document.getElementById('tomate');
+            tomate.style.animation = 'bewegung 3s ease-in-out'; // CSS-Animation aktivieren
+            var soundBoo = document.getElementById('soundBoo');
+            soundBoo.play();
+
+            tomate.addEventListener('animationend', function() {
+            tomate.style.animation = '';
+            tomate.style.opacity= 0;
+            var soundTomato = document.getElementById('soundTomato');
+            soundTomato.play();
+            var buehne = document.getElementById('buehnenbild');
+            buehne.src = "Buehne_Tomated.png"
+        });
+        }
+
+        function publikumJubelt(){
+            var buehne = document.getElementById("buehnenbild");
+            buehne.src = "Buehne_Erfolg.png"
+            var soundLaughing = document.getElementById("soundLaughing");
+            soundLaughing.play();
+        }
+
+        function neutralisieren(){
+            var buehne = document.getElementById("buehnenbild");
+            buehne.src = "Buehne_Neutral.png"
+        }
+		
+		function getCookie(name) {
+  const cookies = document.cookie.split(';');
+  for (const cookie of cookies) {
+    const [cookieName, cookieValue] = cookie.trim().split('=');
+    if (cookieName === name) {
+      return decodeURIComponent(cookieValue);
+    }
+  }
+  return null;
+}
+        
+</script>
+<!-- Load jQuery first -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+
+<!-- Load Popper.js next -->
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
+
+<!-- Load Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+
+</body>
+</html>
